@@ -47,7 +47,7 @@ pip install yt-dlp
 
 Clone Repository
 
-git clone https://github.com/YOUR-USERNAME/smart-youtube-downloader.git
+git clone https://github.com/Madushakelum/smart-youtube-downloader.git
 cd smart-youtube-downloader
 
 ---
