@@ -72,7 +72,8 @@ elif mode == "2":
         height = f.get('height', 'N/A')
         fps = f.get('fps', 30)
         format_id = f['format_id']
-        print(f"{count}. {height}p{fps if fps > 30 else ''}")
+        has_audio = "✅Audio" if f.get('acodec') != 'none' else "❌No Audio"
+        print(f"{count}. {height}p{fps if fps > 30 else ''} [{has_audio}]")
         quality_map[count] = format_id
         count += 1
 
@@ -96,37 +97,42 @@ elif mode == "3":
     os.system("clear")
     print("Playlist Mode Selected.\nFetching playlist info...\n")
 
-    # Show title of playlist
-    print(f"Playlist: {info.get('title','Unknown Playlist')}")
+    print(f"Playlist: {info.get('title','Unknown Playlist')}\n")
+    entries = info.get('entries', [])
 
-    # Select quality for all videos
-    print("\nSelect Playlist Video Quality:")
-    print("1. 360p")
-    print("2. 720p")
-    print("3. 1080p")
-    print("4. Best Available")
-    pq_choice = input("\nEnter choice: ")
+    # Check first video formats for available qualities
+    if entries:
+        first_video_formats = entries[0].get('formats', [])
+        print("Available Qualities (with audio info from first video):")
+        quality_map = {}
+        count = 1
+        for f in first_video_formats:
+            if f.get('vcodec') == 'none' or not f.get('height'):
+                continue
+            height = f.get('height', 'N/A')
+            fps = f.get('fps', 30)
+            format_id = f['format_id']
+            has_audio = "✅Audio" if f.get('acodec') != 'none' else "❌No Audio"
+            print(f"{count}. {height}p{fps if fps > 30 else ''} [{has_audio}]")
+            quality_map[count] = format_id
+            count += 1
 
-    if pq_choice == "1":
-        pq = "bestvideo[height<=360]+bestaudio/best"
-    elif pq_choice == "2":
-        pq = "bestvideo[height<=720]+bestaudio/best"
-    elif pq_choice == "3":
-        pq = "bestvideo[height<=1080]+bestaudio/best"
+        choice = int(input("\nSelect Quality (number) for all videos: "))
+        selected_format = quality_map.get(choice)
+
+        playlist_opts = {
+            'outtmpl': f'{download_folder}/%(playlist)s/%(title)s.%(ext)s',
+            'format': selected_format,
+            'merge_output_format': 'mp4',
+            'progress_hooks': [progress_hook]
+        }
+
+        print("\nDownloading playlist, this may take time...")
+        with yt_dlp.YoutubeDL(playlist_opts) as ydl:
+            ydl.download([url])
+        print("\n✅ Playlist Download Complete! Saved to Download folder.")
     else:
-        pq = "bestvideo+bestaudio/best"
-
-    playlist_opts = {
-        'outtmpl': f'{download_folder}/%(playlist)s/%(title)s.%(ext)s',
-        'format': pq,
-        'merge_output_format': 'mp4',
-        'progress_hooks': [progress_hook]
-    }
-
-    print("\nDownloading playlist, this may take time...")
-    with yt_dlp.YoutubeDL(playlist_opts) as ydl:
-        ydl.download([url])
-    print("\n✅ Playlist Download Complete! Saved to Download folder.")
+        print("❌ No videos found in playlist.")
 
 else:
     print("Invalid choice. Please run again.")
