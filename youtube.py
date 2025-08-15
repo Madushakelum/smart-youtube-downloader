@@ -72,7 +72,7 @@ elif mode == "2":
         height = f.get('height', 'N/A')
         fps = f.get('fps', 30)
         format_id = f['format_id']
-        has_audio = "✅Audio" if f.get('acodec') != 'none' else "❌No Audio"
+        has_audio = "✅Audio" if f.get('acodec') != 'none' else "❌No Audio (Mergeable)"
         print(f"{count}. {height}p{fps if fps > 30 else ''} [{has_audio}]")
         quality_map[count] = format_id
         count += 1
@@ -80,9 +80,10 @@ elif mode == "2":
     choice = int(input("\nSelect Quality (number): "))
     selected_format = quality_map.get(choice)
 
+    # Use merge if audio missing
     video_opts = {
         'outtmpl': f'{download_folder}/%(title)s.%(ext)s',
-        'format': selected_format,
+        'format': f'{selected_format}+bestaudio/best',  # Merge video + best audio
         'merge_output_format': 'mp4',
         'progress_hooks': [progress_hook]
     }
@@ -112,7 +113,7 @@ elif mode == "3":
             height = f.get('height', 'N/A')
             fps = f.get('fps', 30)
             format_id = f['format_id']
-            has_audio = "✅Audio" if f.get('acodec') != 'none' else "❌No Audio"
+            has_audio = "✅Audio" if f.get('acodec') != 'none' else "❌No Audio (Mergeable)"
             print(f"{count}. {height}p{fps if fps > 30 else ''} [{has_audio}]")
             quality_map[count] = format_id
             count += 1
@@ -122,7 +123,7 @@ elif mode == "3":
 
         playlist_opts = {
             'outtmpl': f'{download_folder}/%(playlist)s/%(title)s.%(ext)s',
-            'format': selected_format,
+            'format': f'{selected_format}+bestaudio/best',  # Merge video + best audio
             'merge_output_format': 'mp4',
             'progress_hooks': [progress_hook]
         }
