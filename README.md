@@ -42,6 +42,8 @@ pkg install git -y
 2. Install Required Python Packages
 
 pip install yt-dlp
+pkg update -y
+pkg install ffmpeg -y
 
 ---
 
